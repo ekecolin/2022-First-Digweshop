@@ -1,0 +1,56 @@
+<%- include('header') -%>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+    <!--<a href="/login" id="auth-link">Login</a>-->
+    <ul id="products"></ul>
+    <div class="container" id="main-bod" style="padding: 2%;"></div>
+    <script>
+    window.onload = function()
+    {
+      isLoggedIn();  // When the page loads, call isLoggedIn
+      buildHome();   // and build the homepage.
+    }
+    
+    function buildHome()
+    {
+      fetch("http://127.0.0.1:8000/api/products")
+      .then(resp => resp.json())
+      .then(data => {
+        console.log(data);
+          
+        let i = 0;
+        let len = 0
+        data.forEach(element => {
+          if(i % 3 == 0)  // This makes 3 products line up together, and then move onto a new row.
+          {
+            len += 1;
+            let main_body = document.getElementById("main-bod")
+            let card_deck = document.createElement("div");
+            card_deck.className = "card-deck"
+            card_deck.id = "main-cont-" + len;
+            main_body.appendChild(card_deck);
+          }
+          
+          console.log(element);
+          let name = element['name'];
+          let desc = element['description'];
+          let image = element['image'];
+  
+          let link = document.createElement("a");
+          link.innerHTML = "View";
+          let productLink = "/productindividual?id=" + element['id'];
+  
+          let htmlString = '<div class="card text-center bg-dark" style="width: 25rem; margin-bottom: 2%;">' +
+          '<img style="object-fit: cover" class="card-img-top" src="' + image + '">' 
+          +'<div class="card-body text-light"> <h4 class="card-title">' + name
+          + '</h4> <div class="card-footer"><a href="' + productLink + 
+          '" class="btn btn-primary bg-dark text-light border-light">View </a></div> </div></div>'
+          let maindiv = document.getElementById("main-cont-" + len);
+          let innerHTML = maindiv.innerHTML;
+          maindiv.innerHTML = innerHTML + htmlString;
+          i += 1
+        });
+      })
+    }
+    </script>
+<%- include('footer') -%>

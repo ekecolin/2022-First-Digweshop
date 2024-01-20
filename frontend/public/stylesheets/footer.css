@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@700&family=Poppins:wght@400;500;600&display=swap');
+html {
+    position: relative;
+    min-height: 100%;
+}
+footer {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    background-color: linear-gradient(315deg, #130f40 0%, #000000 74%);
+    color: white;
+    bottom: 0;
+}

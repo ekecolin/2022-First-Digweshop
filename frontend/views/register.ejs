@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+        <link rel="stylesheet" href="/stylesheets/login.css"/>
+		<title>NFT Register Page</title>
+    </head>
+        <div class="center">
+            <h1>Register</h1>
+            <form id="register-form">
+                <div class="txt_field">
+                    <input type="text" name="username-input" id="username"required>
+                    <span></span>
+                    <label for="username-input">Username</label>
+                </div>
+                <div class="txt_field">
+                    <input type="password" name="password-input" id="password" required>
+                    <span></span>
+                    <label for="password-input">Password</label>
+                </div>
+                <div class="txt_field">
+                    <input type="text" name="email-input" id="email" required>
+                    <span></span>
+                    <label for="email-input">Email</label>
+                </div>
+                <button type="submit">Sign Up</button>
+                <div class="reg_link">
+                    Already a member? <a href="/login">Login</a>
+                </div>
+            </form>
+        </div>
+    <script>
+    function formValidator(event) {
+        event.preventDefault(); // prevents defaults such as form being sent as GET request
+            let uname = document.getElementById("username").value;
+            let pass = document.getElementById("password").value;
+            let mail = document.getElementById("email").value;
+            fetch("http://127.0.0.1:8000/apiregister/", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: uname, password: pass, email: mail })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // still log it so we can debug
+                if ('email' in data) {
+                    // successful register
+                        window.location.href = "/login"; // the "/" is the homepage for node http://127.0.0.1:3000
+                    }
+                    else if(data["username"][0] == "A user with that username already exists."){
+                        alert("User with that username already exists.")
+                    }
+                    else {
+                        alert("username or password invalid");
+                    }
+                });
+        }
+        
+        let registerform = document.getElementById("register-form"); // get the form 
+        registerform.addEventListener('submit', formValidator); // bind the validator function to the submit button for the form
+    </script>
+</html>
+<%- include('footer') -%>

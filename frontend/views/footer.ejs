@@ -1,0 +1,37 @@
+<head>
+    <link rel="stylesheet" href="/stylesheets/footer.css"/>
+</head>
+<body>    
+    <footer>
+      <p>Author: Colin Ekedigwe<br>
+      <a href="https://mail.google.com/">colin.ekedigwe2@mail.dcu.ie</a></p>
+    </footer>
+
+</body>
+    <script>
+	    //window.userLoggedIn = false;
+
+	    function isLoggedIn(){
+		    let accessToken = localStorage.getItem("access");
+            if(accessToken != null){
+                // if there is an access token in localstorage
+                window.userLoggedIn = true;
+            }
+            if(window.userLoggedIn){
+                let loginLink = document.getElementById("auth-link");
+                loginLink.innerHTML = "logout";
+                loginLink.href = "/login";
+                loginLink.onclick = ()=>{
+                    localStorage.removeItem("access"),
+                    localStorage.removeItem("refresh");
+                    window.userLoggedIn = false;
+                }
+            }
+		
+	    }
+
+	    //isLoggedIn(); // when the page loads call isLoggedIn
+        
+    </script>
+</body>
+</html>

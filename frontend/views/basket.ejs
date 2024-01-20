@@ -1,0 +1,239 @@
+<html>
+    <head>
+    <!--<body>-->
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" 
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="/stylesheets/basket.css"/>
+        <!--<div id="main" class="container">-->
+        <title>Shopping Cart</title>
+    </head>
+    <body>
+        <header>
+			<h1 class="logo">NFT SEASONS</h1>
+			<ul class="nav">
+				<li class="navlink"><a href="/">Home</a></li>
+                <li class="navlink"><a href="/about">About</a></li>
+				<li class="navlink"><a href="/order">Order History</a></li>
+				<li class="navlink"><a href="/contact">Contact</a></li>
+				<li class="navlink"><a href="/login" id="auth-link">Logout</a></li>
+			</ul>
+			<div class="burger">
+				<i class="fas fa-bars"></i>
+			</div>
+		</header>
+		<script src="javascripts/main.js"></script>
+        <h1>Shopping Cart</h1>
+        <div class="main-content">
+            <div class="table-responsive">
+                <table id="basketDetailTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Remove / Add</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        
+            <div class="container">
+                <form id="address-form">
+                    <div class="form-row align-items-center">
+                      <div class="col-sm-3 my-1 mx-auto">
+                        <label class="sr-only" for="inlineFormInputName">Home Address</label>
+                        <input type="text" class="form-control" id="address" placeholder="Enter Address" required>
+                      </div>
+                          
+                      <div class="col-sm-3 my-1 mx-auto text-center">
+                          <button type="submit" class="btn btn-primary">Checkout</button>
+                      </div>
+                    </div>
+                  </form>
+            </div>
+            
+            <div id="empty-basket-elements">
+                <div class="col-sm-3 my-1 mx-auto text-center">
+                    <h1>It looks like your basket is empty.</h1>
+                    <h4 id="basket-empty-text">That's not good. <br>You should probably <a href="/"> do something about it</a>.</h4>
+                </div>
+    
+            </div>
+        </div>
+        </div>
+    <!--</body>-->
+    <script>
+        let basketId = 0;
+
+        function addMoreProducts(product_id) {
+		fetch('http://127.0.0.1:8000/apiadd/', {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + localStorage.getItem("access")
+			},
+			body: JSON.stringify({"product_id": product_id})
+			})
+			.then(response => response.json())
+			.then(data => {
+			    window.location.reload();
+				console.log(data)
+			});
+		}
+
+        function deleteProduct(product_id, Name) {
+            let token = localStorage.getItem("access");
+            if(token == null){
+                window.location = "/login"; // redirect to login page if access token does not exist
+            }
+
+            let confirmationAction = confirm("Click OK to remove " + Name);
+            console.log(product_id);
+            if (confirmationAction) {
+                fetch("http://127.0.0.1:8000/apiremove/", {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem("access")
+                    },
+                    body: JSON.stringify({"product_id": product_id})
+                })
+                console.log(product_id);
+                window.location.reload();
+            }
+        }
+    
+        fetch("http://127.0.0.1:8000/api/basket/", {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem("access")
+            }
+        })
+        .then(resp => resp.json())
+        .then(data => data.forEach(element => {
+            let isActive = element['is_active'];
+            console.log(isActive);
+            if (Boolean(isActive)) {
+                let basketItems = element.items;
+                let tableBody = document.createElement("tbody");
+                if (basketItems.length == 0) {
+                    document.getElementById("basket-elements").style.display = "none";
+                    document.getElementById("empty-basket-elements").style.display = "block";
+                }
+                else {
+                    document.getElementById("empty-basket-elements").style.display = "none";
+                }
+            
+                basketId = element['id']
+                basketItems.forEach(item => {
+                    let Quantity = item["quantity"];
+                    let price = item["price"];
+                    let product_id = item["product_id"];
+                    // let tmpLi = document.createElement("li");
+            
+                fetch(product_id)
+                    .then(resp => resp.json())
+                    .then(data => {
+                    console.log(data)
+                    let item_id = data['id'];
+                    console.log(item_id);
+                    // Calling product image and its name also adding the quantity, price and remove button
+                    let product_image = data['image'];
+                    let Name = item['product_name']
+
+                    let table = document.getElementById("basketDetailTable");
+                    let tableRow = document.createElement("tr");
+                    tableBody.appendChild(tableRow);
+                    table.appendChild(tableBody);
+
+                    let productImageTd = document.createElement("td");
+                    let productImageView = document.createElement("img");
+                    productImageView.src = product_image;
+                    productImageView.id = "product-image"
+                    productImageView.className = "mx-auto d-block";
+                    productImageTd.appendChild(productImageView);
+                    tableRow.appendChild(productImageView);
+
+                    let productNameTd = document.createElement("td");
+                    productNameTd.innerHTML = Name;
+                    tableRow.appendChild(productNameTd);
+
+                    let quantityTd = document.createElement("td");
+                    quantityTd.innerHTML = item['quantity'];
+                    tableRow.appendChild(quantityTd);
+
+                    let totalPriceTd = document.createElement("td");
+                    totalPriceTd.innerHTML = "€" + item['price'];
+                    tableRow.appendChild(totalPriceTd);
+
+                    let actionTd = document.createElement("td");
+					let removeButton = document.createElement("button");
+					removeButton.type = "button";
+				    removeButton.id = "remove-product-btn"
+					removeButton.classList.add("btn", "btn-danger", "text-nowrap");
+					removeButton.innerHTML = '<i class="bi bi-trash"></i> Remove'
+					actionTd.appendChild(removeButton);
+					// tableRow.appendChild(actionTd);
+
+					let addMoreButton = document.createElement("button");
+					addMoreButton.type = "button";
+					addMoreButton.classList.add("btn", "btn-success");
+					addMoreButton.innerHTML = '<i class="bi bi-plus-circle-fill"></i> Add'
+					actionTd.appendChild(addMoreButton);
+					tableRow.appendChild(actionTd);
+
+					addMoreButton.onclick = function () {
+						addMoreProducts(item_id, Name);
+					}
+                
+                    removeButton.onclick = function(){
+                        deleteProduct(item_id, Name)
+                    };
+                });
+            })
+            }
+        })
+        )
+        function addressValidator(event) {
+            event.preventDefault();
+            let address = document.getElementById("address").value;
+            console.log(basketId);
+            if (address == "") {
+                alert("The address field cannot be empty");
+            } 
+            else {
+                fetch("http://127.0.0.1:8000/apicheckout/", {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem("access")
+                    },
+                    body: JSON.stringify({basket_id: basketId, shipping_address: address})
+                })
+                .then(response=>response.json())
+                .then(data=>{
+                    console.log(data);
+
+                // redirect to homepage
+                    window.location.href = "/checkout";
+                });
+        
+            }
+        }
+        let addressForm = document.getElementById("address-form");
+        addressForm.addEventListener('submit', addressValidator);
+        </script>
+    </body>
+</html>
+<%- include('footer') -%>
